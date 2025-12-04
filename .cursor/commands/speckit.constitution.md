@@ -6,77 +6,56 @@ handoffs:
     prompt: Implement the feature specification based on the updated constitution. I want to build...
 ---
 
-## User Input
+# Bank Microservice Constitution
 
-```text
-$ARGUMENTS
-```
+## Core Principles
 
-You **MUST** consider the user input before proceeding (if not empty).
+### I. Security and Privacy (NON-NEGOTIABLE)
+- All API endpoints MUST require secure authentication and strict authorization.
+- Communication MUST be encrypted (TLS 1.2+).
+- Sensitive data (account numbers, balances, personal details) MUST NOT be exposed or logged.
+- Idempotency keys are mandatory for all financial operations.
 
-## Outline
+### II. Atomicity and Consistency (NON-NEGOTIABLE)
+- Every withdrawal or transfer MUST be atomic (all-or-nothing) and idempotent.
+- The domain model (Account, Transaction, Money) enforces invariants: no negative balances, double-entry bookkeeping (sum of entries per transaction = 0).
+- Status for each transaction MUST be tracked as PENDING, POSTED, or FAILED.
 
-You are updating the project constitution at `.specify/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+### III. Auditability and Traceability
+- Every operation affecting finances MUST generate immutable ledger entries (LedgerEntry).
+- Each transaction and event is traceable end-to-end with unique references and timestamps.
+- Audit logs MUST be immutable and accessible for compliance checks.
 
-Follow this execution flow:
+### IV. Integration and Observability
+- The microservice MUST publish business events (withdrawals, transfers, failed transactions) to Kafka.
+- All major state changes (success, failure, external integrations) MUST fire events for downstream systems (fraud, notifications, analytics).
+- The system MUST support structured logging, metrics (Prometheus), and end-to-end tracing (OpenTelemetry).
 
-1. Load the existing constitution template at `.specify/memory/constitution.md`.
-   - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
-   **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
+### V. Scalability and Resilience
+- REST endpoints MUST be stateless and support horizontal scaling.
+- Outbox patterns and message queues (Kafka) MUST ensure no loss of business-critical events.
+- Redis (or similar) MUST be used for caching/idempotency handling and optimized read models.
+- All critical failures SHOULD be gracefully degraded and observable by monitoring.
 
-2. Collect/derive values for placeholders:
-   - If user input (conversation) supplies a value, use it.
-   - Otherwise infer from existing repo context (README, docs, prior constitution versions if embedded).
-   - For governance dates: `RATIFICATION_DATE` is the original adoption date (if unknown ask or mark TODO), `LAST_AMENDED_DATE` is today if changes are made, otherwise keep previous.
-   - `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
-     - MAJOR: Backward incompatible governance/principle removals or redefinitions.
-     - MINOR: New principle/section added or materially expanded guidance.
-     - PATCH: Clarifications, wording, typo fixes, non-semantic refinements.
-   - If version bump type ambiguous, propose reasoning before finalizing.
+## Additional Constraints
 
-3. Draft the updated constitution content:
-   - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet—explicitly justify any left).
-   - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.
-   - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non‑negotiable rules, explicit rationale if not obvious.
-   - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.
+- Schema and API versioning MUST ensure backward compatibility and explicit migration for changes.
+- The domain layer (business logic) MUST remain decoupled from technical infrastructure.
+- All code changes MUST pass security, audit, and atomicity tests.
+- Double-entry invariant violations and negative balances are STRICTLY FORBIDDEN.
 
-4. Consistency propagation checklist (convert prior checklist into active validations):
-   - Read `.specify/templates/plan-template.md` and ensure any "Constitution Check" or rules align with updated principles.
-   - Read `.specify/templates/spec-template.md` for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
-   - Read `.specify/templates/tasks-template.md` and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
-   - Read each command file in `.specify/templates/commands/*.md` (including this one) to verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
-   - Read any runtime guidance docs (e.g., `README.md`, `docs/quickstart.md`, or agent-specific guidance files if present). Update references to principles changed.
+## Development and Review Workflow
 
-5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
-   - Version change: old → new
-   - List of modified principles (old title → new title if renamed)
-   - Added sections
-   - Removed sections
-   - Templates requiring updates (✅ updated / ⚠ pending) with file paths
-   - Follow-up TODOs if any placeholders intentionally deferred.
+- All production code MUST be accompanied by automated tests for security, atomicity, audit trail, and event publication.
+- Code reviews MUST verify all requirements above and ensure no architectural or security regression.
+- Emergency changes require immediate post-hoc compliance review.
 
-6. Validation before final output:
-   - No remaining unexplained bracket tokens.
-   - Version line matches report.
-   - Dates ISO format YYYY-MM-DD.
-   - Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).
+## Governance
 
-7. Write the completed constitution back to `.specify/memory/constitution.md` (overwrite).
+- This constitution supersedes technical defaults or legacy documents.
+- Any amendments MUST be versioned, documented, and reviewed for impact on domain rules, auditability, or integrations.
+- Versioning follows semantic rules (major = breaking change, minor = new rule/expansion, patch = clarification).
+- Ratification and amendment dates MUST be tracked in ISO format.
+- Reviews MUST reference this constitution and checklist as standard.
 
-8. Output a final summary to the user with:
-   - New version and bump rationale.
-   - Any files flagged for manual follow-up.
-   - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
-
-Formatting & Style Requirements:
-
-- Use Markdown headings exactly as in the template (do not demote/promote levels).
-- Wrap long rationale lines to keep readability (<100 chars ideally) but do not hard enforce with awkward breaks.
-- Keep a single blank line between sections.
-- Avoid trailing whitespace.
-
-If the user supplies partial updates (e.g., only one principle revision), still perform validation and version decision steps.
-
-If critical info missing (e.g., ratification date truly unknown), insert `TODO(<FIELD_NAME>): explanation` and include in the Sync Impact Report under deferred items.
-
-Do not create a new template; always operate on the existing `.specify/memory/constitution.md` file.
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2025-12-02

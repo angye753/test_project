@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: bank-microservice
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/bankdb
+    username: bankuser
+    password: bankpass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: bank-service-group
+      auto-offset-reset: earliest
+    producer:
+      acks: all
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus,info,env
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.example.bank: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+jwt:
+  secret: "m1C2vWt79fF1lTzQFDWuKxPwYJxNWZ0vuS7jl9gxU05X9MrY7kGJQ7l9t5dVukvL7mjxeo2PgE4vY2t/GIC6Hw=="
+  expiration: 86400000
+
+tracing:
+  enabled: true
+  sampling-rate: 1.0
