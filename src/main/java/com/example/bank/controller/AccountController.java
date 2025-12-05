@@ -6,6 +6,7 @@ import com.example.bank.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -185,6 +186,7 @@ public class AccountController {
     // ==================== DTOs ====================
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class CreateAccountRequest {
         private String holderName;
@@ -193,6 +195,7 @@ public class AccountController {
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class WithdrawalRequest {
         private BigDecimal amount;
@@ -201,6 +204,7 @@ public class AccountController {
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class DepositRequest {
         private BigDecimal amount;
@@ -209,6 +213,7 @@ public class AccountController {
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class TransferRequest {
         private UUID destinationAccountId;
